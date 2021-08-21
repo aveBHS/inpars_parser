@@ -22,6 +22,8 @@ def config(param):
                     value = value[route]
                 else:
                     value = configs[route]
+            else:
+                return None
         if value:
             return value
         return None

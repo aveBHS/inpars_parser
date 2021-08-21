@@ -4,12 +4,13 @@ import requests
 import traceback
 from config import config
 
+
 def get_db_connection():
     return pymysql.connect(
-        host=config('credentials.mysql.host'),
-        user=config('credentials.mysql.user'),
-        password=config('credentials.mysql.password'),
-        database=config('credentials.mysql.base')
+        host=config('database.credentials.host'),
+        user=config('database.credentials.user'),
+        password=config('database.credentials.password'),
+        database=config('database.credentials.base')
     )
 
 
@@ -88,6 +89,6 @@ def get_local_objects_ids(cur: pymysql.connect.cursor = None):
         link = get_db_connection()
         cur = link.cursor()
 
-    cur.execute("SELECT `id` FROM `%s`;" % config('database.tables.objects'))
+    cur.execute(f"SELECT `id` FROM {config('database.tables.objects')};")
     result = cur.fetchall()
     print(result)

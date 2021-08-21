@@ -1,15 +1,15 @@
 configs = {
     "debug": True,
     "credentials": {
-        "api_key": "HpwpTEwJdrCHNVUnF3Ppv_uqVVkA5vuJ",
-        "mysql": {
+        "api_key": "HpwpTEwJdrCHNVUnF3Ppv_uqVVkA5vuJ"
+    },
+    "database": {
+        "credentials": {
             "host": "localhost",
             "user": "root",
             "password": "root",
             "base": "inpars"
-        }
-    },
-    "database": {
+        },
         "tables": {
             "objects": "objects",
             "images": "images"

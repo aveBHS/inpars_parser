@@ -49,14 +49,14 @@ def create_object(obj: dict, link: pymysql.Connection = None):
             `id`, `title`, `description`, `lat`, 
             `lng`, `address`, `cost`, 
             `metroId`, `phones`, `floor`, 
-            `floors`, `categoryId`, `sectionId`, 
+            `floors`, `sq`, `categoryId`, `sectionId`, 
             `typeAd`, `cityId`, `regionId`, 
             `source`
         ) VALUES (
             %s, %s, %s, %s, %s, 
             %s, %s, %s, %s, %s, 
             %s, %s, %s, %s, %s,  
-            %s, %s
+            %s, %s, %s
         );
     '''
     try:
@@ -64,14 +64,18 @@ def create_object(obj: dict, link: pymysql.Connection = None):
             obj['id'], obj['title'], obj['text'], obj['lat'],
             obj['lng'], obj['address'], obj['cost'],
             obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['floor'],
-            obj['floors'], obj['categoryId'], obj['sectionId'],
+            obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
             obj['typeAd'], obj['cityId'], obj['regionId'],
             obj['source']
         )) > 0:
+            if obj['images']:
+                for image in obj['images']:
+                    sql = f'INSERT INTO {config("database.tables.images")} (`object_id`, `path`) VALUES (%s, %s)'
+                    cur.execute(sql, (obj['id'], image))
             link.commit()
             return True
         return False
-    except pymysql.err.ProgrammingError:
+    except:
         if config('debug'):
             traceback.print_exc()
             print(cur._last_executed)
@@ -91,4 +95,9 @@ def get_local_objects_ids(cur: pymysql.connect.cursor = None):
 
 
 if __name__ == '__main__':
-    get_objects()
+    i = 0
+    for obj in get_objects():
+        print(create_object(obj))
+        i += 1
+        if i == 10:
+            break

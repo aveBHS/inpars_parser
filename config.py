@@ -11,7 +11,8 @@ configs = {
     },
     "database": {
         "tables": {
-            "objects": "objects"
+            "objects": "objects",
+            "images": "images"
         }
     },
     "regions": [77]

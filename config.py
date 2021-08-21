@@ -9,6 +9,11 @@ configs = {
             "base": "inpars"
         }
     },
+    "database": {
+        "tables": {
+            "objects": "objects"
+        }
+    },
     "regions": [77]
 }
 

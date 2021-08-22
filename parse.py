@@ -90,5 +90,4 @@ def get_local_objects_ids(cur: pymysql.connect.cursor = None):
         cur = link.cursor()
 
     cur.execute(f"SELECT `id` FROM {config('database.tables.objects')};")
-    result = cur.fetchall()
-    print(result)
+    return [n[0] for n in cur.fetchall()]

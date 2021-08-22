@@ -36,14 +36,55 @@ def create_object(obj: dict, link: pymysql.Connection = None):
     '''
     try:
         if cur.execute(sql, (
-            obj['id'], obj['title'], obj['text'], obj['lat'],
-            obj['lng'], obj['address'], obj['cost'],
-            obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['floor'],
-            obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
-            obj['typeAd'], obj['cityId'], obj['regionId'],
-            obj['source']
+                obj['id'], obj['title'], obj['text'], obj['lat'],
+                obj['lng'], obj['address'], obj['cost'],
+                obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['floor'],
+                obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
+                obj['typeAd'], obj['cityId'], obj['regionId'],
+                obj['source']
         )) > 0:
             if obj['images']:
+                for image in obj['images']:
+                    sql = f'INSERT INTO {config("database.tables.images")} (`object_id`, `path`) VALUES (%s, %s)'
+                    cur.execute(sql, (obj['id'], image))
+            link.commit()
+            return True
+        return False
+    except:
+        if config('debug'):
+            traceback.print_exc()
+            print(cur._last_executed)
+        else:
+            print(f"[ERROR] Can't create new object ID{obj['id']}")
+        return False
+
+
+def update_object(obj: dict, link: pymysql.Connection = None):
+    if not link:
+        link = get_db_connection()
+    cur = link.cursor()
+
+    sql = f'''
+        UPDATE `{config('database.tables.objects')}` SET
+            `title` = %s, `description` = %s, `lat` = %s, 
+            `lng` = %s, `address` = %s, `cost` = %s, 
+            `metroId` = %s, `phones` = %s, `floor` = %s, 
+            `floors` = %s, `sq` = %s, `categoryId` = %s, `sectionId` = %s, 
+            `typeAd` = %s, `cityId` = %s, `regionId` = %s
+        WHERE `id` = %s;
+    '''
+    try:
+        if cur.execute(sql, (
+                obj['title'], obj['text'], obj['lat'],
+                obj['lng'], obj['address'], obj['cost'],
+                obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['floor'],
+                obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
+                obj['typeAd'], obj['cityId'], obj['regionId'], obj['id']
+        )) > 0:
+            if obj['images']:
+                sql = f'DELETE FROM {config("database.tables.images")} WHERE object_id = %s;'
+                cur.execute(sql, obj['id'])
+
                 for image in obj['images']:
                     sql = f'INSERT INTO {config("database.tables.images")} (`object_id`, `path`) VALUES (%s, %s)'
                     cur.execute(sql, (obj['id'], image))

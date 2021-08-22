@@ -22,10 +22,12 @@ def get_objects():
 
     # Построение GET параметров запроса
     request_params = {'_format': 'json'}
-    if config('credentials.api_key'):
-        request_params['access-token'] = config('credentials.api_key')
-    if config('regions'):
-        request_params['regionId'] = ','.join("{0}".format(n) for n in config('regions'))
+    if config('inpars.credentials.api_key'):
+        request_params['access-token'] = config('inpars.credentials.api_key')
+    if config('inpars.regions'):
+        request_params['regionId'] = ','.join("{0}".format(n) for n in config('inpars.regions'))
+    if config('inpars.sources'):
+        request_params['sourceId'] = ','.join("{0}".format(n) for n in config('inpars.sources'))
 
     if len(request_params) > 0:
         url += '?' + '&'.join(['%s=%s' % (key, value) for (key, value) in request_params.items()])

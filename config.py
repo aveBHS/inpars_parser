@@ -1,8 +1,6 @@
 configs = {
     "debug": True,
-    "credentials": {
-        "api_key": "HpwpTEwJdrCHNVUnF3Ppv_uqVVkA5vuJ"
-    },
+
     "database": {
         "credentials": {
             "host": "localhost",
@@ -15,7 +13,14 @@ configs = {
             "images": "images"
         }
     },
-    "regions": [77]
+    "inpars": {
+        "credentials": {
+            "api_key": "HpwpTEwJdrCHNVUnF3Ppv_uqVVkA5vuJ"
+        },
+        "regions": [77],
+        "sources": [1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 15, 18, 20, 21]
+        # All sources: 1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 15, 18, 19, 20, 21
+    }
 }
 
 

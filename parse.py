@@ -18,10 +18,21 @@ def get_db_connection():
             traceback.print_exc()
         return None
 
-def create_object(obj: dict, link: pymysql.Connection = None):
+
+def get_cursor(link: pymysql.Connection):
     if not link:
         link = get_db_connection()
     cur = link.cursor()
+    if cur.connection:
+        return cur
+    link = get_db_connection()
+    return link.cursor()
+
+
+def create_object(obj: dict, link: pymysql.Connection = None):
+    if not link:
+        link = get_db_connection()
+    cur = get_cursor(link)
 
     sql = f'''
         INSERT INTO `{config('database.tables.objects')}` (
@@ -59,12 +70,14 @@ def create_object(obj: dict, link: pymysql.Connection = None):
             traceback.print_exc()
             print(cur._last_executed)
         return False
+    finally:
+        cur.close()
 
 
 def update_object(obj: dict, link: pymysql.Connection = None):
     if not link:
         link = get_db_connection()
-    cur = link.cursor()
+    cur = get_cursor(link)
 
     sql = f'''
         UPDATE `{config('database.tables.objects')}` SET
@@ -98,12 +111,14 @@ def update_object(obj: dict, link: pymysql.Connection = None):
             traceback.print_exc()
             print(cur._last_executed)
         return False
+    finally:
+        cur.close()
 
 
 def archive_object(obj_id: int, link: pymysql.Connection = None):
     if not link:
         link = get_db_connection()
-    cur = link.cursor()
+    cur = get_cursor(link)
 
     sql = f"UPDATE `{config('database.tables.objects')}` SET `status` = 1 WHERE `id` = %s;"
     try:
@@ -115,12 +130,14 @@ def archive_object(obj_id: int, link: pymysql.Connection = None):
             traceback.print_exc()
             print(cur._last_executed)
         return False
+    finally:
+        cur.close()
 
 
 def get_local_objects_ids(cur: pymysql.connect.cursor = None):
     if not cur:
         link = get_db_connection()
-        cur = link.cursor()
+        cur = get_cursor(link)
 
     try:
         cur.execute(f"SELECT `id` FROM {config('database.tables.objects')};")
@@ -129,3 +146,5 @@ def get_local_objects_ids(cur: pymysql.connect.cursor = None):
         if config('debug'):
             traceback.print_exc()
         return None
+    finally:
+        cur.close()

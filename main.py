@@ -1,7 +1,10 @@
+import cv2
 import traceback
 from parse import *
+from gdrive import GDrive
 from config import config
 from inpars import Inpars
+from watermark import set_watermark
 
 
 if __name__ == '__main__':
@@ -21,6 +24,7 @@ if __name__ == '__main__':
         exit(1)
     print("[OK] Done")
 
+    gdrive = GDrive()
     inpars = Inpars(config('inpars.credentials.api_key'))
     print("[ACTION] Starting update")
     while True:
@@ -31,15 +35,27 @@ if __name__ == '__main__':
         for obj in objects:
 
             # TODO image processing
+            print(f" [ACTION] Processing pictures for object ID{obj['id']}")
+            if obj['images']:
+                for i, image in enumerate(obj['images']):
+                    with open("photo.jpg", 'wb') as file:
+                        file.write(requests.get(image).content)
+                    img = cv2.imread('photo.jpg')
+                    img = set_watermark(img, obj['source'], config('source.logo.big'), config('source.logo.small'))
+                    cv2.imwrite('photo.jpg', img)
+                    obj['images'][i] = gdrive.upload_image([{'name': f'{obj["id"]}_{i}.jpg', 'file': 'photo.jpg'}])
 
             if obj['id'] in local_objects:
-                update_object(obj, link)
                 del local_objects[local_objects.index(obj['id'])]
+                if update_object(obj, link):
+                    print(f"    [OK] Object ID{obj['id']} created")
+                else:
+                    print(f"    [ERROR] Can't update object ID{obj['id']}")
             else:
                 if create_object(obj, link):
-                    print(f"[OK] Object ID{obj['id']} created")
+                    print(f"    [OK] Object ID{obj['id']} created")
                 else:
-                    print(f"[ERROR] Can't create object ID{obj['id']}")
+                    print(f"    [ERROR] Can't create object ID{obj['id']}")
 
     print("[OK] Done")
 
@@ -47,7 +63,7 @@ if __name__ == '__main__':
     print("[ACTION] Archiving removed objects")
     for obj_id in local_objects:
         if archive_object(obj_id, link):
-            print(f"[OK] Object ID{obj_id} archived")
+            print(f"    [OK] Object ID{obj_id} archived")
         else:
-            print(f"[ERROR] Can't archive object ID{obj_id}")
+            print(f"    [ERROR] Can't archive object ID{obj_id}")
     print("[OK] Done")

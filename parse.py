@@ -6,13 +6,17 @@ from config import config
 
 
 def get_db_connection():
-    return pymysql.connect(
-        host=config('database.credentials.host'),
-        user=config('database.credentials.user'),
-        password=config('database.credentials.password'),
-        database=config('database.credentials.base')
-    )
-
+    try:
+        return pymysql.connect(
+            host=config('database.credentials.host'),
+            user=config('database.credentials.user'),
+            password=config('database.credentials.password'),
+            database=config('database.credentials.base')
+        )
+    except:
+        if config('debug'):
+            traceback.print_exc()
+        return None
 
 def create_object(obj: dict, link: pymysql.Connection = None):
     if not link:
@@ -54,8 +58,6 @@ def create_object(obj: dict, link: pymysql.Connection = None):
         if config('debug'):
             traceback.print_exc()
             print(cur._last_executed)
-        else:
-            print(f"[ERROR] Can't create new object ID{obj['id']}")
         return False
 
 
@@ -95,8 +97,23 @@ def update_object(obj: dict, link: pymysql.Connection = None):
         if config('debug'):
             traceback.print_exc()
             print(cur._last_executed)
-        else:
-            print(f"[ERROR] Can't create new object ID{obj['id']}")
+        return False
+
+
+def archive_object(obj_id: int, link: pymysql.Connection = None):
+    if not link:
+        link = get_db_connection()
+    cur = link.cursor()
+
+    sql = f"UPDATE `{config('database.tables.objects')}` SET `status` = 1 WHERE `id` = %s;"
+    try:
+        result = cur.execute(sql, obj_id)
+        link.commit()
+        return result > 0
+    except:
+        if config('debug'):
+            traceback.print_exc()
+            print(cur._last_executed)
         return False
 
 
@@ -105,5 +122,10 @@ def get_local_objects_ids(cur: pymysql.connect.cursor = None):
         link = get_db_connection()
         cur = link.cursor()
 
-    cur.execute(f"SELECT `id` FROM {config('database.tables.objects')};")
-    return [n[0] for n in cur.fetchall()]
+    try:
+        cur.execute(f"SELECT `id` FROM {config('database.tables.objects')};")
+        return [n[0] for n in cur.fetchall()]
+    except:
+        if config('debug'):
+            traceback.print_exc()
+        return None

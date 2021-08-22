@@ -19,6 +19,7 @@ class Inpars:
         self.rateRemaining = 0
         self.rateReset = 0
         self.queries = 0
+        self.total_objects = 0
 
     def limit_reset(self, query_limit: int = None):
         if query_limit:
@@ -60,6 +61,7 @@ class Inpars:
             meta = response['meta']
             self.rateRemaining = meta['rateRemaining']
             self.rateReset = meta['rateReset']
+            self.total_objects = meta['totalCount']
 
             return objects
         else:

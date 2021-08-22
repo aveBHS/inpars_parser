@@ -14,33 +14,6 @@ def get_db_connection():
     )
 
 
-def get_objects():
-    url = "https://inpars.ru/api/v2/estate"
-    headers = {
-        "Accept": "application/json"
-    }
-
-    # Построение GET параметров запроса
-    request_params = {'_format': 'json'}
-    if config('inpars.credentials.api_key'):
-        request_params['access-token'] = config('inpars.credentials.api_key')
-    if config('inpars.regions'):
-        request_params['regionId'] = ','.join("{0}".format(n) for n in config('inpars.regions'))
-    if config('inpars.sources'):
-        request_params['sourceId'] = ','.join("{0}".format(n) for n in config('inpars.sources'))
-
-    if len(request_params) > 0:
-        url += '?' + '&'.join(['%s=%s' % (key, value) for (key, value) in request_params.items()])
-
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        return json.loads(response.text)['data']
-    else:
-        if config('debug'):
-            traceback.print_exc()
-        raise ValueError(f"Server response exception [{response.status_code}]")
-
-
 def create_object(obj: dict, link: pymysql.Connection = None):
     if not link:
         link = get_db_connection()

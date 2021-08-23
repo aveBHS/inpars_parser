@@ -35,7 +35,6 @@ if __name__ == '__main__':
 
         for obj in objects:
 
-            # TODO image processing
             print(f" [ACTION] Processing pictures for object ID{obj['id']}")
             if obj['images']:
                 for i, image in enumerate(obj['images']):

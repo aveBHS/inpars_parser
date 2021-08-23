@@ -38,7 +38,7 @@ def create_object(obj: dict, link: pymysql.Connection = None):
         INSERT INTO `{config('database.tables.objects')}` (
             `id`, `title`, `description`, `lat`, 
             `lng`, `address`, `cost`, 
-            `metroId`, `phones`, `floor`, 
+            `metroId`, `phones`, `rooms`, `floor`, 
             `floors`, `sq`, `categoryId`, `sectionId`, 
             `typeAd`, `cityId`, `regionId`, 
             `source`
@@ -46,15 +46,15 @@ def create_object(obj: dict, link: pymysql.Connection = None):
             %s, %s, %s, %s, %s, 
             %s, %s, %s, %s, %s, 
             %s, %s, %s, %s, %s,  
-            %s, %s, %s
+            %s, %s, %s, %s
         );
     '''
     try:
         if cur.execute(sql, (
                 obj['id'], obj['title'], obj['text'], obj['lat'],
                 obj['lng'], obj['address'], obj['cost'],
-                obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['floor'],
-                obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
+                obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['rooms'],
+                obj['floor'], obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
                 obj['typeAd'], obj['cityId'], obj['regionId'],
                 obj['source']
         )) > 0:
@@ -85,7 +85,7 @@ def update_object(obj: dict, link: pymysql.Connection = None):
             `lng` = %s, `address` = %s, `cost` = %s, 
             `metroId` = %s, `phones` = %s, `floor` = %s, 
             `floors` = %s, `sq` = %s, `categoryId` = %s, `sectionId` = %s, 
-            `typeAd` = %s, `cityId` = %s, `regionId` = %s
+            `typeAd` = %s, `cityId` = %s, `regionId` = %s, `rooms` = %s
         WHERE `id` = %s;
     '''
     try:
@@ -94,7 +94,7 @@ def update_object(obj: dict, link: pymysql.Connection = None):
                 obj['lng'], obj['address'], obj['cost'],
                 obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['floor'],
                 obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
-                obj['typeAd'], obj['cityId'], obj['regionId'], obj['id']
+                obj['typeAd'], obj['cityId'], obj['regionId'], obj['rooms'], obj['id']
         )) > 0:
             if obj['images']:
                 sql = f'DELETE FROM {config("database.tables.images")} WHERE object_id = %s;'

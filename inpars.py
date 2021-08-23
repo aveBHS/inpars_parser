@@ -38,6 +38,7 @@ class Inpars:
             'access-token': self.api_key,
             '_format': 'json',
             'limit': self.limit,
+            'expand': ','.join(config('inpars.expand_fields')),
             'timeEnd': self.query_time
         }
         if config('inpars.regions'):

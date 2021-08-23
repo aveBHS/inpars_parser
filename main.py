@@ -1,3 +1,4 @@
+import os
 import cv2
 import traceback
 from parse import *
@@ -42,8 +43,10 @@ if __name__ == '__main__':
                         file.write(requests.get(image).content)
                     img = cv2.imread('photo.jpg')
                     img = set_watermark(img, obj['source'], config('source.logo.big'), config('source.logo.small'))
-                    cv2.imwrite('photo.jpg', img)
-                    obj['images'][i] = gdrive.upload_image([{'name': f'{obj["id"]}_{i}.jpg', 'file': 'photo.jpg'}])
+                    file_name = f'{obj["id"]}_{i}.jpg'
+                    cv2.imwrite(file_name, img)
+                    obj['images'][i] = gdrive.upload_image([{'name': file_name, 'file': file_name}])
+                    os.remove(file_name)
 
             if obj['id'] in local_objects:
                 del local_objects[local_objects.index(obj['id'])]

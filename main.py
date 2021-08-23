@@ -1,6 +1,5 @@
 import os
 import cv2
-import traceback
 from parse import *
 from gdrive import GDrive
 from config import config
@@ -20,7 +19,7 @@ if __name__ == '__main__':
 
     print("[ACTION] Loading local objects ids")
     local_objects = get_local_objects_ids()
-    if not local_objects:
+    if local_objects is None:
         print("[ERROR] Can't get local objects")
         exit(1)
     print("[OK] Done")
@@ -49,10 +48,13 @@ if __name__ == '__main__':
 
             if obj['id'] in local_objects:
                 del local_objects[local_objects.index(obj['id'])]
-                if update_object(obj, link):
-                    print(f"    [OK] Object ID{obj['id']} created")
+                if config('update'):
+                    if update_object(obj, link):
+                        print(f"    [OK] Object ID{obj['id']} created")
+                    else:
+                        print(f"    [ERROR] Can't update object ID{obj['id']}")
                 else:
-                    print(f"    [ERROR] Can't update object ID{obj['id']}")
+                    print(f"    [OK] Object ID{obj['id']} skipped")
             else:
                 if create_object(obj, link):
                     print(f"    [OK] Object ID{obj['id']} created")

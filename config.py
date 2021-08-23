@@ -1,6 +1,7 @@
 configs = {
     "debug": True,
 
+    "update": True,
     "database": {
         "credentials": {
             "host": "localhost",

@@ -1,7 +1,7 @@
 import os
-import traceback
-
 import cv2
+import time
+import traceback
 from parse import *
 from gdrive import GDrive
 from config import config
@@ -37,6 +37,7 @@ if __name__ == '__main__':
                 if config('debug'):
                     traceback.print_exc()
                 print(f"    [ERROR] Can't get object list")
+                time.sleep(10)
                 continue
             if not objects:
                 break

@@ -39,7 +39,9 @@ class Inpars:
             '_format': 'json',
             'limit': self.limit,
             'expand': ','.join(config('inpars.expand_fields')),
-            'timeEnd': self.query_time
+            'timeEnd': self.query_time,
+            'typeAd': ','.join("{0}".format(n) for n in config('inpars.typeAd')),
+            'categoryId': ','.join("{0}".format(n) for n in config('inpars.categoryId'))
         }
         if config('inpars.regions'):
             request_params['regionId'] = ','.join("{0}".format(n) for n in config('inpars.regions'))

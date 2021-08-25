@@ -20,7 +20,9 @@ configs = {
         },
         "regions": [77],
         "sources": [1, 2, 3, 5, 7, 9, 10, 11, 13, 15, 18, 20, 21],
-        "expand_fields": ['rooms']
+        "expand_fields": ['rooms'],
+        "typeAd": [1, 2],
+        "categoryId": [28, 32, 47]
         # All sources: 1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 15, 18, 19, 20, 21
     },
     "source": {

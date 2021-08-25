@@ -31,11 +31,22 @@ if __name__ == '__main__':
         inpars = Inpars(config('inpars.credentials.api_key'))
         print("[ACTION] Starting update")
         while True:
-            objects = inpars.get_objects()
+            try:
+                objects = inpars.get_objects()
+            except:
+                if config('debug'):
+                    traceback.print_exc()
+                print(f"    [ERROR] Can't get object list")
+                continue
             if not objects:
                 break
 
             for obj in objects:
+                if int(obj['id']) in local_objects:
+                    if not config('update'):
+                        del local_objects[local_objects.index(int(obj['id']))]
+                        print(f"    [OK] Object ID{obj['id']} skipped")
+                        continue
 
                 print(f" [ACTION] Processing pictures for object ID{obj['id']}")
                 if obj['images']:
@@ -59,8 +70,8 @@ if __name__ == '__main__':
                             except:
                                 pass
 
-                if obj['id'] in local_objects:
-                    del local_objects[local_objects.index(obj['id'])]
+                if int(obj['id']) in local_objects:
+                    del local_objects[local_objects.index(int(obj['id']))]
                     if config('update'):
                         if update_object(obj, link):
                             print(f"    [OK] Object ID{obj['id']} created")

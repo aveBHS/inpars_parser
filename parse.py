@@ -141,7 +141,7 @@ def get_local_objects_ids(cur: pymysql.connect.cursor = None):
 
     try:
         cur.execute(f"SELECT `id` FROM {config('database.tables.objects')};")
-        return [n[0] for n in cur.fetchall()]
+        return [int(n[0]) for n in cur.fetchall()]
     except:
         if config('debug'):
             traceback.print_exc()

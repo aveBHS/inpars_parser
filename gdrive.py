@@ -25,3 +25,7 @@ class GDrive:
             file.SetContentFile(upload_file['file'])
             file.Upload()
             return 'https://drive.google.com/uc?export=view&id=' + file['id']
+
+
+if __name__ == "__main__":
+    gdrive = GDrive()

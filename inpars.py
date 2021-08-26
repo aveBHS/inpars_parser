@@ -43,6 +43,8 @@ class Inpars:
             'typeAd': ','.join("{0}".format(n) for n in config('inpars.typeAd')),
             'categoryId': ','.join("{0}".format(n) for n in config('inpars.categoryId'))
         }
+        if config('inpars.cities'):
+            request_params['cityId'] = ','.join("{0}".format(n) for n in config('inpars.cities'))
         if config('inpars.regions'):
             request_params['regionId'] = ','.join("{0}".format(n) for n in config('inpars.regions'))
         if config('inpars.sources'):
@@ -70,6 +72,7 @@ class Inpars:
         else:
             if config('debug'):
                 traceback.print_exc()
+            print(f"[ERROR_INFO] Request URL: {url}")
             raise ValueError(f"Server response exception [{response.status_code}]")
 
     def check_limits(self):

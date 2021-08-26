@@ -19,6 +19,7 @@ configs = {
             "api_key": "HpwpTEwJdrCHNVUnF3Ppv_uqVVkA5vuJ"
         },
         "regions": [77],
+        "cities": [1],
         "sources": [1, 2, 3, 5, 7, 9, 10, 11, 13, 15, 18, 20, 21],
         "expand_fields": ['rooms'],
         "typeAd": [1, 2],

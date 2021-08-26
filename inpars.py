@@ -70,6 +70,12 @@ class Inpars:
 
             return objects
         else:
+            if response.status_code == 400:
+                try:
+                    if "Значение «timeEnd» не может быть меньше установленного по умолчанию значения «timeStart»." in response.text:
+                        return None
+                except:
+                    pass
             if config('debug'):
                 traceback.print_exc()
             print(f"[ERROR_INFO] Request URL: {url}")

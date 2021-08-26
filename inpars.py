@@ -70,6 +70,13 @@ class Inpars:
 
             return objects
         else:
+            if response.status_code == 400:
+                try:
+                    response = json.loads(response.text)
+                    if "Значение «timeEnd» не может быть меньше установленного по умолчанию значения «timeStart»." in response['message']:
+                        return None
+                except:
+                    pass
             if config('debug'):
                 traceback.print_exc()
             print(f"[ERROR_INFO] Request URL: {url}")

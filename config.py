@@ -34,6 +34,11 @@ configs = {
     },
     "gdrive": {
         "folder": "1ASAXw1GX5MaeJ1-S4xiA2r2dcm22QMIO"
+    },
+    "site": {
+        "host": "example.com",
+        "images_path": "/uploads/",
+        "images_folder": "/var/www/site/public_html/uploads/"
     }
 }
 

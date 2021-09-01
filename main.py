@@ -57,10 +57,9 @@ if __name__ == '__main__':
                                 file.write(requests.get(image).content)
                             img = cv2.imread('photo.jpg')
                             img = set_watermark(img, obj['source'], config('source.logo.big'), config('source.logo.small'))
-                            file_name = f'{obj["id"]}_{i}.jpg'
+                            file_name = config("site.images_folder") + f'{obj["id"]}_{i}.jpg'
                             cv2.imwrite(file_name, img)
-                            obj['images'][i] = gdrive.upload_image([{'name': file_name, 'file': file_name}])
-                            os.remove(file_name)
+                            obj['images'][i] = config("site.host") + config("site.images_path") + file_name
                         except:
                             if config('debug'):
                                 traceback.print_exc()

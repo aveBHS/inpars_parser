@@ -6,7 +6,31 @@ from parse import *
 from gdrive import GDrive
 from config import config
 from inpars import Inpars
+from threading import Thread
 from watermark import set_watermark
+
+
+photos_buffer = {}
+
+
+def photo_processing_thread(object_id, photo_url, photo_index):
+    try:
+        with open("photo.jpg", 'wb') as file:
+            file.write(requests.get(image).content)
+        img = cv2.imread('photo.jpg')
+        img = set_watermark(img, photo_url, config('source.logo.big'), config('source.logo.small'))
+        file_name = config("site.images_folder") + f'{object_id}_{photo_index}.jpg'
+        cv2.imwrite(file_name, img)
+        photos_buffer[photo_index] = config("site.host") + config("site.images_path") + file_name
+    except:
+        if config('debug'):
+            traceback.print_exc()
+        print(f"    [ERROR] Can't process image for ID{object_id}")
+        try:
+            if os.path.isfile(f'{object_id}_{photo_index}.jpg'):
+                os.remove(f'{object_id}_{photo_index}.jpg')
+        except:
+            pass
 
 
 if __name__ == '__main__':
@@ -50,25 +74,24 @@ if __name__ == '__main__':
                         continue
 
                 print(f" [ACTION] Processing pictures for object ID{obj['id']}")
+                photo_processing_threads = []
                 if obj['images']:
                     for i, image in enumerate(obj['images']):
-                        try:
-                            with open("photo.jpg", 'wb') as file:
-                                file.write(requests.get(image).content)
-                            img = cv2.imread('photo.jpg')
-                            img = set_watermark(img, obj['source'], config('source.logo.big'), config('source.logo.small'))
-                            file_name = config("site.images_folder") + f'{obj["id"]}_{i}.jpg'
-                            cv2.imwrite(file_name, img)
-                            obj['images'][i] = config("site.host") + config("site.images_path") + file_name
-                        except:
-                            if config('debug'):
-                                traceback.print_exc()
-                            print(f"    [ERROR] Can't process image for ID{obj['id']}")
-                            try:
-                                if os.path.isfile(f'{obj["id"]}_{i}.jpg'):
-                                    os.remove(f'{obj["id"]}_{i}.jpg')
-                            except:
-                                pass
+                        thread = Thread(target=photo_processing_thread, args=(obj['id'], image, i))
+                        photo_processing_threads.append(thread)
+                        thread.start()
+                for thread in photo_processing_threads:
+                    start_check_time = int(time.time())
+                    while thread.isAlive():
+                        if int(time.time()) - start_check_time > 30:
+                            print("    [ERROR] Thread timeout, skip photo")
+                            break
+                for photo_id in photos_buffer.keys():
+                    try:
+                        obj['images'][photo_id] = photos_buffer[photo_id]
+                    except IndexError:
+                        pass
+                photos_buffer = {}
 
                 if int(obj['id']) in local_objects:
                     del local_objects[local_objects.index(int(obj['id']))]

@@ -21,7 +21,7 @@ def photo_processing_thread(object_id, photo_url, photo_index):
         img = set_watermark(img, photo_url, config('source.logo.big'), config('source.logo.small'))
         file_name = config("site.images_folder") + f'{object_id}_{photo_index}.jpg'
         cv2.imwrite(file_name, img)
-        photos_buffer[photo_index] = config("site.host") + config("site.images_path") + file_name
+        photos_buffer[object_id][photo_index] = config("site.host") + config("site.images_path") + file_name
     except:
         if config('debug'):
             traceback.print_exc()
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                         if int(time.time()) - start_check_time > 30:
                             print("    [ERROR] Thread timeout, skip photo")
                             break
-                for photo_id in photos_buffer.keys():
+                for photo_id in photos_buffer[obj['id']].keys():
                     try:
                         obj['images'][photo_id] = photos_buffer[photo_id]
                     except IndexError:
@@ -118,4 +118,9 @@ if __name__ == '__main__':
             else:
                 print(f"    [ERROR] Can't archive object ID{obj_id}")
         print("[OK] Done")
+
+        print("[ACTION] Setting update flag")
+
+        print("[OK] Done")
+
         print('[INFO] All tasks done, restarting')

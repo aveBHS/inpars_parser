@@ -1,4 +1,5 @@
 import json
+import time
 import pymysql
 import requests
 import traceback
@@ -142,6 +143,21 @@ def get_local_objects_ids(cur: pymysql.connect.cursor = None):
     try:
         cur.execute(f"SELECT `id` FROM {config('database.tables.objects')};")
         return [int(n[0]) for n in cur.fetchall()]
+    except:
+        if config('debug'):
+            traceback.print_exc()
+        return None
+    finally:
+        cur.close()
+
+
+def set_update_flag(cur: pymysql.connect.cursor = None):
+    if not cur:
+        link = get_db_connection()
+        cur = get_cursor(link)
+
+    try:
+        cur.execute(f"UPDATE `updates` SET `time` = %s WHERE `type` = 'parser';", int(time.time()))
     except:
         if config('debug'):
             traceback.print_exc()

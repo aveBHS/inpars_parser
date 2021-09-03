@@ -2,6 +2,8 @@ import os
 import cv2
 import time
 import traceback
+
+import parse
 from parse import *
 from gdrive import GDrive
 from config import config
@@ -120,7 +122,7 @@ if __name__ == '__main__':
         print("[OK] Done")
 
         print("[ACTION] Setting update flag")
-
+        parse.set_update_flag()
         print("[OK] Done")
 
         print('[INFO] All tasks done, restarting')

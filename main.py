@@ -16,6 +16,11 @@ photos_buffer = {}
 
 
 def photo_processing_thread(object_id, object_source, photo_url, photo_index):
+    if photo_url == "default":
+        photos_buffer[object_id][photo_index] = [
+            config("site.host") + config("site.images_path") + config("site.default_photo")]
+        photos_buffer[object_id][photo_index].append(photo_url)
+        return
     try:
         file_name = config("site.images_folder") + f'{object_id}_{photo_index}.jpg'
         with open(file_name, 'wb') as file:
@@ -23,7 +28,8 @@ def photo_processing_thread(object_id, object_source, photo_url, photo_index):
         img = cv2.imread(file_name)
         img = set_watermark(img, object_source, config('source.logo.big'), config('source.logo.small'))
         cv2.imwrite(file_name, img)
-        photos_buffer[object_id][photo_index] = [config("site.host") + config("site.images_path") + f'{object_id}_{photo_index}.jpg']
+        photos_buffer[object_id][photo_index] = [
+            config("site.host") + config("site.images_path") + f'{object_id}_{photo_index}.jpg']
         photos_buffer[object_id][photo_index].append(photo_url)
     except:
         if config('debug'):
@@ -34,6 +40,10 @@ def photo_processing_thread(object_id, object_source, photo_url, photo_index):
                 os.remove(f'{object_id}_{photo_index}.jpg')
         except:
             pass
+        finally:
+            photos_buffer[object_id][photo_index] = [
+                config("site.host") + config("site.images_path") + config("site.default_photo")]
+            photos_buffer[object_id][photo_index].append(photo_url)
 
 
 if __name__ == '__main__':
@@ -77,6 +87,9 @@ if __name__ == '__main__':
                         continue
 
                 print(f" [ACTION] Processing pictures for object ID{obj['id']}")
+                if not obj['images']:
+                    obj['images'] = ['default']
+                    print("    [INFO] Object hasn't pictures")
                 photo_processing_threads = []
                 photos_buffer = {obj['id']: {}}
                 if obj['images']:

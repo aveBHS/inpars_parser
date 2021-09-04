@@ -15,15 +15,16 @@ from watermark import set_watermark
 photos_buffer = {}
 
 
-def photo_processing_thread(object_id, photo_url, photo_index):
+def photo_processing_thread(object_id, object_source, photo_url, photo_index):
     try:
-        with open("photo.jpg", 'wb') as file:
-            file.write(requests.get(image).content)
-        img = cv2.imread('photo.jpg')
-        img = set_watermark(img, photo_url, config('source.logo.big'), config('source.logo.small'))
         file_name = config("site.images_folder") + f'{object_id}_{photo_index}.jpg'
+        with open(file_name, 'wb') as file:
+            file.write(requests.get(photo_url).content)
+        img = cv2.imread(file_name)
+        img = set_watermark(img, object_source, config('source.logo.big'), config('source.logo.small'))
         cv2.imwrite(file_name, img)
-        photos_buffer[object_id][photo_index] = config("site.host") + config("site.images_path") + file_name
+        photos_buffer[object_id][photo_index] = [config("site.host") + config("site.images_path") + f'{object_id}_{photo_index}.jpg']
+        photos_buffer[object_id][photo_index].append(photo_url)
     except:
         if config('debug'):
             traceback.print_exc()
@@ -77,26 +78,27 @@ if __name__ == '__main__':
 
                 print(f" [ACTION] Processing pictures for object ID{obj['id']}")
                 photo_processing_threads = []
+                photos_buffer = {obj['id']: {}}
                 if obj['images']:
                     for i, image in enumerate(obj['images']):
-                        thread = Thread(target=photo_processing_thread, args=(obj['id'], image, i))
+                        thread = Thread(target=photo_processing_thread, args=(obj['id'], obj['source'], image, i))
                         photo_processing_threads.append(thread)
                         thread.start()
                 for thread in photo_processing_threads:
                     start_check_time = int(time.time())
-                    while thread.isAlive():
+                    while thread.is_alive():
                         if int(time.time()) - start_check_time > 30:
                             print("    [ERROR] Thread timeout, skip photo")
                             break
-                unprocessed_photos = [i for i in range(0, len(obj['images']))]
+                unprocessed_photos = [i for i in obj['images']]
                 for photo_id in photos_buffer[obj['id']].keys():
                     try:
-                        obj['images'][photo_id] = photos_buffer[photo_id]
-                        del unprocessed_photos[unprocessed_photos.index(photo_id)]
+                        obj['images'][photo_id] = photos_buffer[obj['id']][photo_id][0]
+                        del unprocessed_photos[unprocessed_photos.index(photos_buffer[obj['id']][photo_id][1])]
                     except IndexError:
                         pass
-                for photo_id in unprocessed_photos:
-                    del obj['images'][photo_id]
+                for photo in unprocessed_photos:
+                    del obj['images'][obj['images'].index(photo)]
                 photos_buffer = {}
 
                 if int(obj['id']) in local_objects:

@@ -1,4 +1,5 @@
 import json
+import time
 import pymysql
 import requests
 import traceback
@@ -123,6 +124,25 @@ def archive_object(obj_id: int, link: pymysql.Connection = None):
     sql = f"UPDATE `{config('database.tables.objects')}` SET `status` = 1 WHERE `id` = %s;"
     try:
         result = cur.execute(sql, obj_id)
+        link.commit()
+        return result > 0
+    except:
+        if config('debug'):
+            traceback.print_exc()
+            print(cur._last_executed)
+        return False
+    finally:
+        cur.close()
+
+
+def set_update_flag(link: pymysql.Connection = None):
+    if not link:
+        link = get_db_connection()
+    cur = get_cursor(link)
+
+    sql = f"UPDATE `updates` SET `time` = %s WHERE `type` = 'parser';"
+    try:
+        result = cur.execute(sql, int(time.time()))
         link.commit()
         return result > 0
     except:

@@ -2,6 +2,8 @@ import os
 import cv2
 import time
 import traceback
+
+import parse
 from parse import *
 from gdrive import GDrive
 from config import config
@@ -86,11 +88,15 @@ if __name__ == '__main__':
                         if int(time.time()) - start_check_time > 30:
                             print("    [ERROR] Thread timeout, skip photo")
                             break
+                unprocessed_photos = [i for i in range(0, len(obj['images']))]
                 for photo_id in photos_buffer[obj['id']].keys():
                     try:
                         obj['images'][photo_id] = photos_buffer[photo_id]
+                        del unprocessed_photos[unprocessed_photos.index(photo_id)]
                     except IndexError:
                         pass
+                for photo_id in unprocessed_photos:
+                    del obj['images'][photo_id]
                 photos_buffer = {}
 
                 if int(obj['id']) in local_objects:
@@ -120,7 +126,7 @@ if __name__ == '__main__':
         print("[OK] Done")
 
         print("[ACTION] Setting update flag")
-
+        parse.set_update_flag()
         print("[OK] Done")
 
         print('[INFO] All tasks done, restarting')

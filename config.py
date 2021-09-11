@@ -38,7 +38,8 @@ configs = {
     "site": {
         "host": "example.com",
         "images_path": "/uploads/",
-        "images_folder": "/var/www/site/public_html/uploads/"
+        "images_folder": "/var/www/site/public_html/uploads/",
+        "default_photo": 'default.jpg'
     }
 }
 

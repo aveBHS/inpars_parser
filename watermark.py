@@ -1,6 +1,15 @@
 import cv2
 
 
+def blur_logos_background(image, logos_top_border, logos_left_border, width, length, anchor=(20, 20)):
+    image[logos_top_border: width + logos_top_border, logos_left_border: logos_left_border + length, :] = \
+        cv2.blur(image[logos_top_border: width + logos_top_border,
+                 logos_left_border: logos_left_border + length, :],
+                 anchor, cv2.BORDER_CONSTANT)
+
+    return image
+
+
 def multiple_images(image, shape):
     """
     изменяет размеры картинкы и повторяет туже картинку.
@@ -43,153 +52,194 @@ def set_watermark(background_image, source_website, big_logo_path, small_logo_pa
     beta = 0.0
     if source_website == "avito.ru":
         logo = cv2.imread(big_logo_path)
-        logo = cv2.resize(logo, (background_image.shape[1], min(int(background_image.shape[1] * 1.2),
-                                                                background_image.shape[0])))
-        overlay_image = cv2.copyMakeBorder(logo,
-                                           (background_image.shape[0] - logo.shape[0]) // 2,
-                                           background_image.shape[0] - ((background_image.shape[0] +
-                                                                         logo.shape[0]) // 2),
-                                           (background_image.shape[1] - logo.shape[1]) // 2,
-                                           background_image.shape[1] - ((background_image.shape[1] +
-                                                                         logo.shape[1]) // 2),
-                                           cv2.BORDER_CONSTANT, (0, 0, 0))
+        logo_width = min(int(background_image.shape[1] * 0.6), background_image.shape[0] // 2)
+        logo_length = int(3 * background_image.shape[1] / 4)
+        logo = cv2.resize(logo, (logo_length, logo_width))
 
-        alpha = 1.0
-        beta = 0.75
+        logo_top_border = (background_image.shape[0] - logo.shape[0]) // 2
+        logo_bottom_border = background_image.shape[0] - ((background_image.shape[0] + logo.shape[0]) // 2)
+        logo_left_border = (background_image.shape[1] - logo.shape[1]) // 2
+        logo_right_border = background_image.shape[1] - ((background_image.shape[1] + logo.shape[1]) // 2)
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length)
+        overlay_image = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border, logo_left_border,
+                                           logo_right_border, cv2.BORDER_CONSTANT, (0, 0, 0))
+
+        alpha = 0.7
+        beta = 1.2
 
     elif source_website == 'cian.ru':
-        logo = cv2.imread(big_logo_path)
-        logo = cv2.resize(logo, (background_image.shape[1] // 2, background_image.shape[0] // 2))
-        overlay_image = cv2.copyMakeBorder(logo[:-(background_image.shape[0] // 10), :, :],
-                                           background_image.shape[0] - logo.shape[0] + (
-                                                   background_image.shape[0] // 10),
-                                           0,
-                                           background_image.shape[1] - logo.shape[1],
-                                           0,
-                                           cv2.BORDER_CONSTANT, (0, 0, 0))
-        alpha = 1.0
-        beta = 0.9
+        logo = cv2.imread(small_logo_path)
+        logo_width = background_image.shape[0] // 4
+        logo_length = background_image.shape[1] // 3
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = background_image.shape[0] - logo.shape[0] - 10
+        logo_bottom_border = 10
+        logo_left_border = background_image.shape[1] - logo.shape[1] - 50
+        logo_right_border = 50
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length)
+        overlay_image = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border, logo_left_border,
+                                           logo_right_border, cv2.BORDER_CONSTANT, (0, 0, 0))
+
+        alpha = 0.8
+        beta = 2
 
     elif source_website == "irr.ru" or source_website == "kupiprodai.ru":
         logo = cv2.imread(small_logo_path)
-        logo = cv2.resize(logo, (min(341, background_image.shape[1]), min(227, background_image.shape[0])))
+        logo_width = min(224, background_image.shape[0] // 5)
+        logo_length = min(300, background_image.shape[1] // 2)
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = background_image.shape[0] - logo.shape[0]
+        logo_bottom_border = 0
+        logo_left_border = background_image.shape[1] - logo.shape[1]
+        logo_right_border = 0
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length)
         overlay_image = cv2.copyMakeBorder(
-            logo[:-(logo.shape[0] // 4), :-(3 * logo.shape[1] // 30), :],
-            background_image.shape[0] - logo.shape[0] + (logo.shape[0] // 4),
-            0,
-            background_image.shape[1] - logo.shape[1] + (3 * logo.shape[1] // 30),
-            0,
-            cv2.BORDER_CONSTANT, (0, 0, 0))
+            logo, logo_top_border,
+            logo_bottom_border, logo_left_border, logo_right_border, cv2.BORDER_CONSTANT, (0, 0, 0))
 
         alpha = 0.9
         beta = 2.0
 
     elif source_website == "youla.io" or source_website == "sob.ru" or source_website == "mlsn.ru":
         logo = cv2.imread(big_logo_path)
-        logo = cv2.resize(logo, (min(300, background_image.shape[1]), min(200, background_image.shape[0])))
-        overlay_image = cv2.copyMakeBorder(logo[:, :, :],
-                                           background_image.shape[0] - logo.shape[0],
-                                           0,
-                                           background_image.shape[1] - logo.shape[1],
-                                           0,
+        logo_width = min(100, background_image.shape[0])
+        logo_length = min(200, background_image.shape[1])
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = background_image.shape[0] - logo.shape[0]
+        logo_bottom_border = 0
+        logo_left_border = background_image.shape[1] - logo.shape[1]
+        logo_right_border = 0
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length)
+        overlay_image = cv2.copyMakeBorder(logo,
+                                           logo_top_border,
+                                           logo_bottom_border,
+                                           logo_left_border,
+                                           logo_right_border,
                                            cv2.BORDER_CONSTANT, (0, 0, 0))
         alpha = 1.0
         beta = 0.7
 
     elif source_website == "bazarpnz.ru":
         logo = cv2.imread(small_logo_path)
-        logo = cv2.resize(logo[:, 50:, :], (450, 266))
-        overlay_image = cv2.copyMakeBorder(logo,
-                                           (background_image.shape[0] - logo.shape[0]) // 2,
-                                           background_image.shape[0] - ((background_image.shape[0] +
-                                                                         logo.shape[0]) // 2),
-                                           (background_image.shape[1] - logo.shape[1]) // 2,
-                                           background_image.shape[1] - ((background_image.shape[1] +
-                                                                         logo.shape[1]) // 2),
-                                           cv2.BORDER_CONSTANT, (0, 0, 0))
+        logo_width = 266
+        logo_length = 450
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = (background_image.shape[0] - logo.shape[0]) // 2
+        logo_bottom_border = background_image.shape[0] - ((background_image.shape[0] + logo.shape[0]) // 2)
+        logo_left_border = (background_image.shape[1] - logo.shape[1]) // 2
+        logo_right_border = background_image.shape[1] - ((background_image.shape[1] + logo.shape[1]) // 2)
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length)
+        overlay_image = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border, logo_left_border,
+                                           logo_right_border, cv2.BORDER_CONSTANT, (0, 0, 0))
 
         alpha = 1.0
         beta = 1.2
 
     elif source_website == "move.ru":
         logo = cv2.imread(big_logo_path)
-        logo = cv2.resize(logo, (min(background_image.shape[1], 225), min(background_image.shape[0], 200)))
-        overlay_image = cv2.copyMakeBorder(
-            logo[:-(3 * logo.shape[0] // 10), :-(logo.shape[1] // 15), :],
-            background_image.shape[0] - logo.shape[0] + (3 * logo.shape[0] // 10),
-            0,
-            background_image.shape[1] - logo.shape[1] + (logo.shape[1] // 15),
-            0,
-            cv2.BORDER_CONSTANT, (0, 0, 0))
+        logo_width = min(background_image.shape[0], 100)
+        logo_length = min(background_image.shape[1], 225)
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = background_image.shape[0] - logo.shape[0]
+        logo_bottom_border = 0
+        logo_left_border = background_image.shape[1] - logo.shape[1]
+        logo_right_border = 0
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length, anchor=(40, 40))
+        overlay_image = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border, logo_left_border,
+                                           logo_right_border, cv2.BORDER_CONSTANT, (0, 0, 0))
 
         alpha = 0.9
         beta = 2.0
 
     elif source_website == "realty.yandex.ru":
         logo = cv2.imread(small_logo_path)
-        logo = cv2.resize(logo, (min(background_image.shape[1], 300), min(background_image.shape[0], 192)))
-        print(background_image.shape)
-        overlay_image = cv2.copyMakeBorder(
-            logo[(logo.shape[0] // 3):, (logo.shape[1] // 6):, :],
-            0,
-            background_image.shape[0] - logo.shape[0] + (logo.shape[0] // 3),
-            0,
-            background_image.shape[1] - logo.shape[1] + (logo.shape[1] // 6),
-            cv2.BORDER_CONSTANT, (0, 0, 0))
+        logo_width = min(background_image.shape[0], 70)
+        logo_length = min(background_image.shape[1], 220)
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = 0
+        logo_bottom_border = background_image.shape[0] - logo.shape[0]
+        logo_left_border = 0
+        logo_right_border = background_image.shape[1] - logo.shape[1]
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length, anchor=(40, 40))
+        overlay_image = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border,
+                                           logo_left_border, logo_right_border,
+                                           cv2.BORDER_CONSTANT, (0, 0, 0))
 
         alpha = 1.0
         beta = 2.0
 
     elif source_website == "moyareklama.ru":
         logo = cv2.imread(big_logo_path)
-        logo = cv2.resize(logo, (min(background_image.shape[1], 231), min(background_image.shape[0], 280)))
-        overlay_image = cv2.copyMakeBorder(logo[:-(logo.shape[0] // 13), :, :],
-                                           (background_image.shape[0] - logo.shape[0]) // 2 + logo.shape[0] // 13,
-                                           background_image.shape[0] - ((background_image.shape[0] +
-                                                                         logo.shape[0]) // 2),
-                                           (background_image.shape[1] - logo.shape[1]) // 2,
-                                           background_image.shape[1] - ((background_image.shape[1] +
-                                                                         logo.shape[1]) // 2),
+        logo_width = min(background_image.shape[0], 150)
+        logo_length = min(background_image.shape[1], 231)
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = (background_image.shape[0] - logo.shape[0]) // 2
+        logo_bottom_border = background_image.shape[0] - ((background_image.shape[0] + logo.shape[0]) // 2)
+        logo_left_border = (background_image.shape[1] - logo.shape[1]) // 2
+        logo_right_border = background_image.shape[1] - ((background_image.shape[1] + logo.shape[1]) // 2)
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length, anchor=(30, 30))
+        overlay_image = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border,
+                                           logo_left_border, logo_right_border,
                                            cv2.BORDER_CONSTANT, (0, 0, 0))
         alpha = 1.0
         beta = 1.0
 
     elif source_website == "dom.sakh.com":
         logo = cv2.imread(big_logo_path)
-        logo = cv2.resize(logo, (min(background_image.shape[1], int(background_image.shape[0])),
-                                 background_image.shape[0] // 2))
-        overlay_image = cv2.copyMakeBorder(logo,
-                                           6 * (background_image.shape[0] - logo.shape[0]) // 7,
-                                           background_image.shape[0] - logo.shape[0] - 6 *
-                                           (background_image.shape[0] - logo.shape[0]) // 7,
-                                           (background_image.shape[1] - logo.shape[1]) // 2,
-                                           background_image.shape[1] - ((background_image.shape[1] +
-                                                                         logo.shape[1]) // 2),
-                                           cv2.BORDER_CONSTANT, (0, 0, 0))
+        logo_width = background_image.shape[0] // 4
+        logo_length = min(background_image.shape[1], int(background_image.shape[0]))
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = 3 * (background_image.shape[0] - logo.shape[0]) // 4
+        logo_bottom_border = background_image.shape[0] - logo.shape[0] - \
+                             3 * (background_image.shape[0] - logo.shape[0]) // 4
+        logo_left_border = (background_image.shape[1] - logo.shape[1]) // 2
+        logo_right_border = background_image.shape[1] - ((background_image.shape[1] + logo.shape[1]) // 2)
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length, anchor=(50, 50))
+        overlay_image = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border, logo_left_border,
+                                           logo_right_border, cv2.BORDER_CONSTANT, (0, 0, 0))
         alpha = 1.0
         beta = 1.2
 
-    elif source_website == "gipernn.ru":
-        logo = cv2.imread(big_logo_path)
-        logo = cv2.resize(logo, (200, 350))
-        logo = cv2.copyMakeBorder(logo, 0, 0, 70, 0, cv2.BORDER_CONSTANT, (0, 0, 0))
-        logo = logo[58:-100, 30:-20, :]
-        overlay_image = multiple_images(logo, background_image.shape)
-
-        alpha = 1.0
-        beta = 1.5
+    # elif source_website == "gipernn.ru":
+    #     logo = cv2.imread(big_logo_path)
+    #     logo_width = 350
+    #     logo_length = 200
+    #     logo = cv2.resize(logo, (logo_length, logo_width))
+    #     logo_top_border = 0
+    #     logo_bottom_border = 0
+    #     logo_left_border = 70
+    #     logo_right_border = 0
+    #     background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+    #                                              logo_width, logo_length, anchor=(50, 50))
+    #     logo = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border, logo_left_border,
+    #                               logo_right_border, cv2.BORDER_CONSTANT, (0, 0, 0))
+    #     overlay_image = multiple_images(logo, background_image.shape)
+    #
+    #     alpha = 1.0
+    #     beta = 1.5
 
     elif source_website == "orsk.ru":
         logo = cv2.imread(big_logo_path)
-        logo = cv2.resize(logo, (min(background_image.shape[1], 355), background_image.shape[0] // 2))
-        overlay_image = cv2.copyMakeBorder(logo,
-                                           (background_image.shape[0] - logo.shape[0]) // 2,
-                                           background_image.shape[0] - ((background_image.shape[0] +
-                                                                         logo.shape[0]) // 2),
-                                           (background_image.shape[1] - logo.shape[1]) // 2,
-                                           background_image.shape[1] - ((background_image.shape[1] +
-                                                                         logo.shape[1]) // 2),
-                                           cv2.BORDER_CONSTANT, (0, 0, 0))
+        logo_width = background_image.shape[0] // 4
+        logo_length = min(background_image.shape[1], 355)
+        logo = cv2.resize(logo, (logo_length, logo_width))
+        logo_top_border = (background_image.shape[0] - logo.shape[0]) // 2
+        logo_bottom_border = background_image.shape[0] - ((background_image.shape[0] + logo.shape[0]) // 2)
+        logo_left_border = (background_image.shape[1] - logo.shape[1]) // 2
+        logo_right_border = background_image.shape[1] - ((background_image.shape[1] + logo.shape[1]) // 2)
+        background_image = blur_logos_background(background_image, logo_top_border, logo_left_border,
+                                                 logo_width, logo_length)
+        overlay_image = cv2.copyMakeBorder(logo, logo_top_border, logo_bottom_border, logo_left_border,
+                                           logo_right_border, cv2.BORDER_CONSTANT, (0, 0, 0))
         alpha = 1.0
         beta = 0.8
 

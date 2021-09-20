@@ -125,7 +125,7 @@ def archive_object(obj_id: int, link: pymysql.Connection = None):
     try:
         result = cur.execute(sql, obj_id)
         link.commit()
-        return result > 0
+        return True
     except:
         if config('debug'):
             traceback.print_exc()

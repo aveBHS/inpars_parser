@@ -1,11 +1,7 @@
 import os
 import cv2
-import time
-import traceback
-
 import parse
 from parse import *
-from gdrive import GDrive
 from config import config
 from inpars import Inpars
 from threading import Thread
@@ -53,7 +49,6 @@ if __name__ == '__main__':
             exit(1)
         print("[OK] Done")
 
-        gdrive = GDrive()
         inpars = Inpars(config('inpars.credentials.api_key'))
         print("[ACTION] Starting update")
         while True:

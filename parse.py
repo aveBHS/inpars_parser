@@ -168,18 +168,3 @@ def get_local_objects_ids(cur: pymysql.connect.cursor = None):
         return None
     finally:
         cur.close()
-
-
-def set_update_flag(cur: pymysql.connect.cursor = None):
-    if not cur:
-        link = get_db_connection()
-        cur = get_cursor(link)
-
-    try:
-        cur.execute(f"UPDATE `updates` SET `time` = %s WHERE `type` = 'parser';", int(time.time()))
-    except:
-        if config('debug'):
-            traceback.print_exc()
-        return None
-    finally:
-        cur.close()

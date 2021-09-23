@@ -38,26 +38,27 @@ def create_object(obj: dict, link: pymysql.Connection = None):
     sql = f'''
         INSERT INTO `{config('database.tables.objects')}` (
             `id`, `title`, `description`, `lat`, 
-            `lng`, `address`, `cost`, 
+            `lng`, `address`, `cost`, `name`,
             `metroId`, `phones`, `rooms`, `floor`, 
             `floors`, `sq`, `categoryId`, `sectionId`, 
             `typeAd`, `cityId`, `regionId`, 
-            `source`
+            `source`, `metroSlug`, `materialSlug`
         ) VALUES (
             %s, %s, %s, %s, %s, 
             %s, %s, %s, %s, %s, 
             %s, %s, %s, %s, %s,  
-            %s, %s, %s, %s
+            %s, %s, %s, %s, %s, 
+            %s, %s
         );
     '''
     try:
         if cur.execute(sql, (
                 obj['id'], obj['title'], obj['text'], obj['lat'],
-                obj['lng'], obj['address'], obj['cost'],
+                obj['lng'], obj['address'], obj['cost'], obj['name'],
                 obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['rooms'],
                 obj['floor'], obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
                 obj['typeAd'], obj['cityId'], obj['regionId'],
-                obj['source']
+                obj['source'], obj['metro'], obj['material']
         )) > 0:
             if obj['images']:
                 for image in obj['images']:
@@ -69,7 +70,7 @@ def create_object(obj: dict, link: pymysql.Connection = None):
     except:
         if config('debug'):
             traceback.print_exc()
-            print(cur._last_executed)
+            # print(cur._last_executed)
         return False
     finally:
         cur.close()
@@ -83,19 +84,21 @@ def update_object(obj: dict, link: pymysql.Connection = None):
     sql = f'''
         UPDATE `{config('database.tables.objects')}` SET
             `title` = %s, `description` = %s, `lat` = %s, 
-            `lng` = %s, `address` = %s, `cost` = %s, 
+            `lng` = %s, `address` = %s, `cost` = %s, name = %s,
             `metroId` = %s, `phones` = %s, `floor` = %s, 
             `floors` = %s, `sq` = %s, `categoryId` = %s, `sectionId` = %s, 
-            `typeAd` = %s, `cityId` = %s, `regionId` = %s, `rooms` = %s
+            `typeAd` = %s, `cityId` = %s, `regionId` = %s, `rooms` = %s,
+            `metroSlug` = %s, `materialSlug` = %s
         WHERE `id` = %s;
     '''
     try:
         if cur.execute(sql, (
                 obj['title'], obj['text'], obj['lat'],
-                obj['lng'], obj['address'], obj['cost'],
+                obj['lng'], obj['address'], obj['cost'], obj['name'],
                 obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['floor'],
                 obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
-                obj['typeAd'], obj['cityId'], obj['regionId'], obj['rooms'], obj['id']
+                obj['typeAd'], obj['cityId'], obj['regionId'], obj['rooms'],
+                obj['metro'], obj['material'], obj['id']
         )) > 0:
             if obj['images']:
                 sql = f'DELETE FROM {config("database.tables.images")} WHERE object_id = %s;'

@@ -53,7 +53,7 @@ def set_watermark(background_image, source_website, big_logo_path, small_logo_pa
     if source_website == "avito.ru":
         logo = cv2.imread(big_logo_path)
         logo_width = min(int(background_image.shape[1] * 0.6), background_image.shape[0] // 2)
-        logo_length = int(3 * background_image.shape[1] / 4)
+        logo_length = int(5 * background_image.shape[1] / 6)
         logo = cv2.resize(logo, (logo_length, logo_width))
 
         logo_top_border = (background_image.shape[0] - logo.shape[0]) // 2
@@ -71,7 +71,7 @@ def set_watermark(background_image, source_website, big_logo_path, small_logo_pa
     elif source_website == 'cian.ru':
         logo = cv2.imread(small_logo_path)
         logo_width = background_image.shape[0] // 4
-        logo_length = background_image.shape[1] // 3
+        logo_length = background_image.shape[1] // 2
         logo = cv2.resize(logo, (logo_length, logo_width))
         logo_top_border = background_image.shape[0] - logo.shape[0] - 10
         logo_bottom_border = 10
@@ -245,3 +245,15 @@ def set_watermark(background_image, source_website, big_logo_path, small_logo_pa
 
     result = cv2.addWeighted(background_image, alpha, overlay_image, beta, 0)
     return result
+
+
+if __name__ == "__main__":
+    image = cv2.imread("avito.jpg")
+
+    result = set_watermark(image, "avito.ru", "2.jpg", "1.jpg")
+
+    while True:
+        cv2.imshow("img", result)
+
+        if cv2.waitKey(0):
+            break

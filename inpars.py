@@ -4,6 +4,7 @@ import datetime
 import requests
 import traceback
 from config import config
+from datetime import datetime, timedelta
 
 
 class Inpars:
@@ -14,7 +15,7 @@ class Inpars:
     def __init__(self, api_key: str, query_limit: int = 100):
         self.api_key = api_key
         self.limit = query_limit
-        self.query_time = int(time.time())
+        self.query_time = 0
         self.last_query = 0
         self.rateRemaining = 0
         self.rateReset = 0
@@ -24,10 +25,12 @@ class Inpars:
     def limit_reset(self, query_limit: int = None):
         if query_limit:
             self.limit = query_limit
-        self.query_time = int(time.time())
+        self.query_time = 0
         self.queries = 0
 
     def get_objects(self):
+        if self.query_time == -1:
+            return None
         url = "https://inpars.ru/api/v2/estate"
         headers = {
             "Accept": "application/json"
@@ -60,8 +63,13 @@ class Inpars:
         if response.status_code == 200:
             response = json.loads(response.text)
             objects = response['data']
-            query_date = datetime.datetime.fromisoformat(objects[-1]['created'])
-            self.query_time = int(time.mktime(query_date.timetuple()))
+
+            query_date = datetime.fromisoformat(objects[-1]['updated'])
+            last_month = (datetime.now() - timedelta(days=30)).timestamp()
+            if query_date.timestamp() <= last_month:
+                self.query_time = -1
+            else:
+                self.query_time = int(time.mktime(query_date.timetuple()))
 
             meta = response['meta']
             self.rateRemaining = meta['rateRemaining']
@@ -86,3 +94,9 @@ class Inpars:
         if self.rateReset > 0 and self.rateRemaining < 1:
             if(int(time.time()) - self.last_query) < self.rateReset:
                 time.sleep(self.rateReset - (int(time.time()) - self.last_query) + 1)
+
+
+if __name__ == "__main__":
+    api = Inpars(config("inpars.credentials.api_key"), config("inpars.request_limit"))
+    while api.get_objects():
+        pass

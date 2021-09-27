@@ -23,7 +23,8 @@ configs = {
         "sources": [1, 2, 3, 5, 7, 9, 10, 11, 13, 15, 18, 20, 21],
         "expand_fields": ['rooms', 'metro', 'material'],
         "typeAd": [1, 2],
-        "categoryId": [28, 32, 47]
+        "categoryId": [28, 32, 47],
+        "request_limit": 1000,
         # All sources: 1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 15, 18, 19, 20, 21
     },
     "source": {

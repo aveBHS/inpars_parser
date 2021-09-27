@@ -95,7 +95,7 @@ if __name__ == '__main__':
                     del local_objects[local_objects.index(int(obj['id']))]
                     if config('update'):
                         if update_object(obj, link):
-                            print(f"    [OK] Object ID{obj['id']} created")
+                            print(f"    [OK] Object ID{obj['id']} updated")
                         else:
                             print(f"    [ERROR] Can't update object ID{obj['id']}")
                     else:

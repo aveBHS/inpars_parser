@@ -70,6 +70,10 @@ if __name__ == '__main__':
                         print(f"    [OK] Object ID{obj['id']} skipped")
                         continue
 
+                for word in ['хостел', 'койко-место', 'койкоместо', 'капсула']:
+                    if word in obj['text'].lower():
+                        continue
+
                 print(f" [ACTION] Processing pictures for object ID{obj['id']}")
                 photo_processing_threads = []
                 photos_buffer = {str(obj['id']): {}}

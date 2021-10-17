@@ -65,7 +65,7 @@ class Inpars:
             objects = response['data']
 
             query_date = datetime.fromisoformat(objects[-1]['updated'])
-            last_month = (datetime.now() - timedelta(days=30)).timestamp()
+            last_month = (datetime.now() - timedelta(days=14)).timestamp()
             if query_date.timestamp() <= last_month:
                 self.query_time = -1
             else:

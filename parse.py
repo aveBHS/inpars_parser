@@ -138,6 +138,25 @@ def archive_object(obj_id: int, link: pymysql.Connection = None):
         cur.close()
 
 
+def archive_old_objects(date_from: str, status: int = 1, link: pymysql.Connection = None):
+    if not link:
+        link = get_db_connection()
+    cur = get_cursor(link)
+
+    sql = f"UPDATE `{config('database.tables.objects')}` SET `status` = {status} WHERE `created` <= %s;"
+    try:
+        result = cur.execute(sql, date_from)
+        link.commit()
+        return True
+    except:
+        if config('debug'):
+            traceback.print_exc()
+            print(cur._last_executed)
+        return False
+    finally:
+        cur.close()
+
+
 def set_update_flag(link: pymysql.Connection = None):
     if not link:
         link = get_db_connection()

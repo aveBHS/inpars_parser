@@ -1,3 +1,4 @@
+import datetime
 import os
 import cv2
 import parse
@@ -6,6 +7,7 @@ from config import config
 from inpars import Inpars
 from threading import Thread
 from watermark import set_watermark
+from datetime import datetime, timedelta
 
 
 photos_buffer = {}
@@ -41,6 +43,12 @@ if __name__ == '__main__':
             print("[ERROR] Can't connect to DB")
             exit(1)
         print("[OK] Done")
+
+        print("[ACTION] Archiving old objects")
+        date_from = (datetime.now() - timedelta(days=14)).strftime('%Y-%m-%d %H:%M:%S')
+        archive_old_objects(date_from, 1)
+        date_from = (datetime.now() - timedelta(days=21)).strftime('%Y-%m-%d %H:%M:%S')
+        archive_old_objects(date_from, 2)
 
         print("[ACTION] Loading local objects ids")
         local_objects = get_local_objects_ids()

@@ -76,7 +76,7 @@ class Inpars:
             self.rateReset = meta['rateReset']
             self.total_objects = meta['totalCount']
 
-            return objects
+            return [obj for obj in objects if datetime.fromisoformat(obj['updated']).timestamp() > last_month]
         else:
             if response.status_code == 400:
                 try:

@@ -64,14 +64,14 @@ if __name__ == '__main__':
                 break
 
             for obj in objects:
+                for word in ['хостел', 'хостела', 'койко-место', 'койкоместо', 'капсула']:
+                    if word in obj['text'].lower() or int(obj['cost']) < 1000:
+                        continue
+
                 if int(obj['id']) in local_objects:
                     if not config('update'):
                         del local_objects[local_objects.index(int(obj['id']))]
                         print(f"    [OK] Object ID{obj['id']} skipped")
-                        continue
-
-                for word in ['хостел', 'койко-место', 'койкоместо', 'капсула']:
-                    if word in obj['text'].lower():
                         continue
 
                 print(f" [ACTION] Processing pictures for object ID{obj['id']}")

@@ -1,7 +1,8 @@
-import datetime
 import os
+import sys
 import cv2
 import parse
+import datetime
 from parse import *
 from config import config
 from inpars import Inpars
@@ -34,7 +35,7 @@ def photo_processing_thread(object_id, source, photo_url, photo_index):
 
 
 if __name__ == '__main__':
-    while True:
+    def main():
         print("[INFO] Inpars parser started")
 
         print("[ACTION] Connecting to DB")
@@ -134,3 +135,9 @@ if __name__ == '__main__':
         print("[OK] Done")
 
         print('[INFO] All tasks done, restarting')
+
+    main_thread = Thread(target=main)
+    main_thread.start()
+    main_thread.join(10 * 60)
+    os.execv(sys.executable, ['python'] + sys.argv)
+    exit()

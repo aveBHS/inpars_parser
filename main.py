@@ -11,31 +11,31 @@ from watermark import set_watermark
 from datetime import datetime, timedelta
 
 
-photos_buffer = {}
-
-
-def photo_processing_thread(object_id, source, photo_url, photo_index):
-    file_name = config("site.images_folder") + f'{object_id}_{photo_index}.jpg'
-    try:
-        with open(file_name, 'wb') as file:
-            file.write(requests.get(photo_url).content)
-        img = cv2.imread(file_name)
-        img = set_watermark(img, source, config('source.logo.big'), config('source.logo.small'))
-        cv2.imwrite(file_name, img)
-        photos_buffer[str(object_id)][photo_index] = config("site.host") + config("site.images_path") + f'{object_id}_{photo_index}.jpg'
-    except:
-        if config('debug'):
-            traceback.print_exc()
-        print(f"    [ERROR] Can't process image for ID{object_id}")
-        try:
-            if os.path.isfile(file_name):
-                os.remove(file_name)
-        except:
-            pass
-
-
 if __name__ == '__main__':
     def main():
+
+        photos_buffer = {}
+
+        def photo_processing_thread(object_id, source, photo_url, photo_index):
+            file_name = config("site.images_folder") + f'{object_id}_{photo_index}.jpg'
+            try:
+                with open(file_name, 'wb') as file:
+                    file.write(requests.get(photo_url).content)
+                img = cv2.imread(file_name)
+                img = set_watermark(img, source, config('source.logo.big'), config('source.logo.small'))
+                cv2.imwrite(file_name, img)
+                photos_buffer[str(object_id)][photo_index] = config("site.host") + config(
+                    "site.images_path") + f'{object_id}_{photo_index}.jpg'
+            except:
+                if config('debug'):
+                    traceback.print_exc()
+                print(f"    [ERROR] Can't process image for ID{object_id}")
+                try:
+                    if os.path.isfile(file_name):
+                        os.remove(file_name)
+                except:
+                    pass
+
         print("[INFO] Inpars parser started")
 
         print("[ACTION] Connecting to DB")

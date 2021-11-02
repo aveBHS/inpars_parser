@@ -1,3 +1,4 @@
+import copy
 import os
 import sys
 import cv2
@@ -56,6 +57,7 @@ if __name__ == '__main__':
         if local_objects is None:
             print("[ERROR] Can't get local objects")
             exit(1)
+        hidden_objects = list(set(copy.deepcopy(local_objects)))
         print("[OK] Done")
 
         inpars = Inpars(config('inpars.credentials.api_key'))
@@ -79,7 +81,7 @@ if __name__ == '__main__':
 
                 if int(obj['id']) in local_objects:
                     if not config('update'):
-                        del local_objects[local_objects.index(int(obj['id']))]
+                        del hidden_objects[hidden_objects.index(int(obj['id']))]
                         print(f"    [OK] Object ID{obj['id']} skipped")
                         continue
 
@@ -105,7 +107,7 @@ if __name__ == '__main__':
                 photos_buffer = {}
 
                 if int(obj['id']) in local_objects:
-                    del local_objects[local_objects.index(int(obj['id']))]
+                    del hidden_objects[hidden_objects.index(int(obj['id']))]
                     if config('update'):
                         if update_object(obj, link):
                             print(f"    [OK] Object ID{obj['id']} updated")
@@ -121,9 +123,9 @@ if __name__ == '__main__':
 
         print("[OK] Done")
 
-        print(f"[INFO] Removed from publication: {len(local_objects)} objects")
+        print(f"[INFO] Removed from publication: {len(hidden_objects)} objects")
         print("[ACTION] Archiving removed objects")
-        for obj_id in local_objects:
+        for obj_id in hidden_objects:
             if archive_object(obj_id, link):
                 print(f"    [OK] Object ID{obj_id} archived")
             else:

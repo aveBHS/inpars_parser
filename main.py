@@ -81,7 +81,10 @@ if __name__ == '__main__':
 
                 if int(obj['id']) in local_objects:
                     if not config('update'):
-                        del hidden_objects[hidden_objects.index(int(obj['id']))]
+                        try:
+                            del hidden_objects[hidden_objects.index(int(obj['id']))]
+                        except ValueError:
+                            pass
                         print(f"    [OK] Object ID{obj['id']} skipped")
                         continue
 
@@ -107,7 +110,10 @@ if __name__ == '__main__':
                 photos_buffer = {}
 
                 if int(obj['id']) in local_objects:
-                    del hidden_objects[hidden_objects.index(int(obj['id']))]
+                    try:
+                        del hidden_objects[hidden_objects.index(int(obj['id']))]
+                    except ValueError:
+                        pass
                     if config('update'):
                         if update_object(obj, link):
                             print(f"    [OK] Object ID{obj['id']} updated")
@@ -141,5 +147,5 @@ if __name__ == '__main__':
     main_thread = Thread(target=main)
     main_thread.start()
     main_thread.join(10 * 60)
-    os.execv(sys.executable, ['python'] + sys.argv)
+    os.execv(sys.executable, ['python3.8'] + sys.argv)
     exit()

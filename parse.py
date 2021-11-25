@@ -42,13 +42,13 @@ def create_object(obj: dict, link: pymysql.Connection = None):
             `metroId`, `phones`, `rooms`, `floor`, 
             `floors`, `sq`, `categoryId`, `sectionId`, 
             `typeAd`, `cityId`, `regionId`, 
-            `source`, `metroSlug`, `materialSlug`
+            `source`, `metroSlug`, `materialSlug`, `origin`
         ) VALUES (
             %s, %s, %s, %s, %s, 
             %s, %s, %s, %s, %s, 
             %s, %s, %s, %s, %s,  
             %s, %s, %s, %s, %s, 
-            %s, %s
+            %s, %s, %s
         );
     '''
     try:
@@ -58,7 +58,7 @@ def create_object(obj: dict, link: pymysql.Connection = None):
                 obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['rooms'],
                 obj['floor'], obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
                 obj['typeAd'], obj['cityId'], obj['regionId'],
-                obj['source'], obj['metro'], obj['material']
+                obj['source'], obj['metro'], obj['material'], obj['url']
         )) > 0:
             if obj['images']:
                 for image in obj['images']:
@@ -84,11 +84,11 @@ def update_object(obj: dict, link: pymysql.Connection = None):
     sql = f'''
         UPDATE `{config('database.tables.objects')}` SET
             `title` = %s, `description` = %s, `lat` = %s, 
-            `lng` = %s, `address` = %s, `cost` = %s, name = %s,
+            `lng` = %s, `address` = %s, `cost` = %s, `name` = %s,
             `metroId` = %s, `phones` = %s, `floor` = %s, 
             `floors` = %s, `sq` = %s, `categoryId` = %s, `sectionId` = %s, 
             `typeAd` = %s, `cityId` = %s, `regionId` = %s, `rooms` = %s,
-            `metroSlug` = %s, `materialSlug` = %s
+            `metroSlug` = %s, `materialSlug` = %s, `origin` = %s
         WHERE `inpars_id` = %s;
     '''
     try:
@@ -98,22 +98,23 @@ def update_object(obj: dict, link: pymysql.Connection = None):
                 obj['metroId'], ','.join("{0}".format(n) for n in obj['phones']), obj['floor'],
                 obj['floors'], obj['sq'], obj['categoryId'], obj['sectionId'],
                 obj['typeAd'], obj['cityId'], obj['regionId'], obj['rooms'],
-                obj['metro'], obj['material'], obj['id']
+                obj['metro'], obj['material'], obj['url'], obj['id']
         )) > 0:
             if obj['images']:
-                sql = f'DELETE FROM {config("database.tables.images")} WHERE object_id = (SELECT `id` FROM `objects` WHERE `inpars_id` = %s);'
+                sql = f'DELETE FROM {config("database.tables.images")} WHERE `object_id` = (SELECT `id` FROM `objects` WHERE `inpars_id` = %s);'
                 cur.execute(sql, obj['id'])
 
-                for image in obj['images']:
-                    sql = f'INSERT INTO {config("database.tables.images")} (`object_id`, `path`) VALUES ((SELECT `id` FROM `objects` WHERE `inpars_id` = %s), %s)'
-                    cur.execute(sql, (obj['id'], image))
+                if obj['images']:
+                    for image in obj['images']:
+                        sql = f'INSERT INTO {config("database.tables.images")} (`object_id`, `path`) VALUES ((SELECT `id` FROM `objects` WHERE `inpars_id` = %s), %s)'
+                        cur.execute(sql, (obj['id'], image))
             link.commit()
             return True
         return False
     except:
         if config('debug'):
             traceback.print_exc()
-            print(cur._last_executed)
+            print(json.dumps(cur._last_executed))
         return False
     finally:
         cur.close()
